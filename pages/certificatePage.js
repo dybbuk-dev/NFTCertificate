@@ -41,7 +41,7 @@ export default function certificatePage() {
               setLoading(false);
             })
             .catch((err) => {
-              window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
+              window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
                 query.token
               }&participantId=${query.participantId}`;
             });
@@ -60,7 +60,7 @@ export default function certificatePage() {
               setLoading(false);
             })
             .catch((err) => {
-              window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
+              window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
                 query.token
               }&participantId=${query.participantId}`;
             });

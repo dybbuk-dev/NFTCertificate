@@ -39,14 +39,14 @@ export default function Index() {
                 setLoading(false);
               })
               .catch((err, res) => {
-                window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - Error while getting Participant data"}&token=${
+                window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - Error while getting Participant data"}&token=${
                   query.token
                 }&participantId=${query.participantId}`;
               });
           }
         })
         .catch((err, res) => {
-          window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - Not Matched"}&token=${
+          window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - Not Matched"}&token=${
             query.token
           }&participantId=${query.participantId}`;
         });
