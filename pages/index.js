@@ -12,7 +12,7 @@ export default function Index() {
   const tablet = useMediaQuery("(min-width:768px)");
   const [loading, setLoading] = useState(true);
   let { query } = useRouter();
-  const [available, setAvailable] = useState("Indisponível");
+  const [minted, setMinted] = useState(false);
   const [role, setRole] = useState("");
   const [name, setName] = useState("");
   useEffect(() => {
@@ -20,21 +20,17 @@ export default function Index() {
     if (query.participantId !== undefined) {
       axios
         .get(
-          `https://amazonia-cripto.onrender.com/validateAccessToken/${query.token}/${query.participantId}`
+          `https://amazonia-cripto-back-end.onrender.com/validateAccessToken/${query.token}/${query.participantId}`
         )
         .then((res) => {
           if (res.status === 200) {
             axios
               .get(
-                `https://amazonia-cripto.onrender.com/getParticipantData/${query.participantId}`
+                `https://amazonia-cripto-back-end.onrender.com/getParticipantData/${query.participantId}`
               )
               .then((result) => {
                 setRole(result.data.role);
-                if (result.data.minted === true) {
-                  setAvailable("Disponível");
-                } else {
-                  setAvailable("Indisponível");
-                }
+                setMinted(result.data.minted);
                 setName(result.data.name);
                 setLoading(false);
               })
@@ -55,170 +51,128 @@ export default function Index() {
   return (
     <div>
       <Header token={query.token} participantId={query.participantId} />
-      {loading && <Spinner />}
-      <Grid container>
-        {tablet ? (
-          <>
-            <Grid
-              item
-              xs={6}
-              className="mockupLeft"
-              sx={{ paddingY: { sm: 2, md: 4 } }}
-            >
-              <Box display="flex" justifyContent="center" mt="90px">
-                <Box
-                  className="box"
-                  sx={{
-                    width: desktop ? 450 : 360,
-                    height: desktop ? 300 : 240,
-                  }}
-                >
+      {loading ? (
+        <Spinner />
+      ) : (
+        <Grid container>
+          {tablet ? (
+            <>
+              <Grid
+                item
+                xs={6}
+                className="mockupLeft"
+                sx={{ paddingY: { sm: 2, md: 4 } }}
+              >
+                <Box display="flex" justifyContent="center" mt="90px">
                   <Box
-                    ml="45%"
-                    mt="23%"
-                    mr="5%"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <Typography
-                      fontSize={desktop ? "32px" : "24px"}
-                      textAlign="center"
-                    >
-                      {name}
-                    </Typography>
-                  </Box>
+                    className="box"
+                    sx={{
+                      width: desktop ? 450 : 360,
+                      height: desktop ? 300 : 240,
+                    }}
+                  />
                 </Box>
-              </Box>
-              <Box justifyContent="center" display="flex" pt="90px" mb="25px">
-                <a
-                  className="btn"
-                  href={`/certificatePage?token=${query.token}&participantId=${query.participantId}&name=${name}`}
-                  style={{
-                    fontSize: "32px",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  Obter NFT
-                </a>
-              </Box>
-            </Grid>
-            <Grid item xs={6} className="mockupRight">
-              <Box display="flex" justifyContent="center">
-                <Box>
-                  <Box
-                    className="profile"
-                    height={desktop ? "130px" : "100px"}
-                    width="40vw"
-                    pt={2}
-                    pl={desktop ? 23 : 17}
-                    sx={{ display: "flex", justifyContent: "flex-start" }}
+                <Box justifyContent="center" display="flex" pt="90px" mb="25px">
+                  <a
+                    className="btn"
+                    href={`/certificatePage?token=${query.token}&participantId=${query.participantId}`}
+                    style={{
+                      fontSize: "32px",
+                      color: "white",
+                      cursor: "pointer",
+                    }}
                   >
-                    <Image src={profile} className="avatar" alt="profile" />
+                    {minted ? "Ver NFT" : "Obter NFT"}
+                  </a>
+                </Box>
+              </Grid>
+              <Grid item xs={6} className="mockupRight">
+                <Box display="flex" justifyContent="center">
+                  <Box>
                     <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "start",
-                      }}
+                      className="profile"
+                      width="40vw"
+                      py={2}
+                      pl={desktop ? 23 : 17}
+                      display="flex"
                     >
+                      <Image src={profile} className="avatar" alt="profile" />
+                      <Box>
+                        <Typography fontSize={desktop ? "32px" : "24px"}>
+                          <strong>{name} </strong>
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box gap={2} mt={desktop ? "4rem" : "3rem"}>
                       <Typography fontSize={desktop ? "32px" : "24px"}>
-                        <strong>{name} </strong>
+                        Participação: <strong>{role}</strong>
+                      </Typography>
+                      <Typography fontSize={desktop ? "32px" : "24px"}>
+                        Token NFT:{" "}
+                        <strong>{minted ? "Resgatado" : "Disponível"}</strong>
                       </Typography>
                     </Box>
                   </Box>
-                  <Box gap={2} mt={desktop ? "4rem" : "3rem"}>
-                    <Typography fontSize={desktop ? "32px" : "24px"}>
-                      Participação: <strong>{role}</strong>
-                    </Typography>
-                    <Typography fontSize={desktop ? "32px" : "24px"}>
-                      Token NFT: <strong>{available}</strong>
-                    </Typography>
-                  </Box>
                 </Box>
-              </Box>
-            </Grid>
-          </>
-        ) : (
-          <>
-            <Grid item xs={12} className="mockupRight">
-              <Box display="flex" justifyContent="center" sx={{ mt: "10%" }}>
-                <Box>
-                  <Box
-                    className="profile"
-                    pl={13}
-                    pt={2}
-                    sx={{ display: "flex", justifyContent: "flex-start" }}
-                  >
-                    <Image
-                      src={profile}
-                      alt="profile"
-                      className="avatar"
-                    ></Image>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "start",
-                      }}
-                    >
-                      <Typography fontSize="18px">
-                        <strong>{name}</strong>
+              </Grid>
+            </>
+          ) : (
+            <>
+              <Grid item xs={12} className="mockupRight">
+                <Box display="flex" justifyContent="center" sx={{ mt: "10%" }}>
+                  <Box>
+                    <Box className="profile" pl={13} py={1} display="flex">
+                      <Image
+                        src={profile}
+                        alt="profile"
+                        className="avatar"
+                      ></Image>
+                      <Box>
+                        <Typography fontSize="18px">
+                          <strong>{name}</strong>
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box mt="2rem" mb="3rem">
+                      <Typography fontSize="12px" mb="6px">
+                        Participação: <strong>{role}</strong>
+                      </Typography>
+                      <Typography fontSize="12px">
+                        Token NFT:{" "}
+                        <strong>{minted ? "Resgatado" : "Disponível"}</strong>
                       </Typography>
                     </Box>
                   </Box>
-                  <Box mt="2rem" mb="3rem">
-                    <Typography fontSize="12px" mb="6px">
-                      Participação: <strong>{role}</strong>
-                    </Typography>
-                    <Typography fontSize="12px">
-                      Token NFT: <strong>{available}</strong>
-                    </Typography>
-                  </Box>
                 </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} className="mockupLeft">
-              <Box display="flex" justifyContent="center" my="70px">
-                <Box
-                  className="box"
-                  sx={{
-                    width: 300,
-                    height: 200,
-                  }}
-                >
+              </Grid>
+              <Grid item xs={12} className="mockupLeft">
+                <Box display="flex" justifyContent="center" my="70px">
                   <Box
-                    ml="45%"
-                    mt="25%"
-                    mr="5%"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <Typography fontSize="16px" textAlign="center">
-                      {name}
-                    </Typography>
-                  </Box>
+                    className="box"
+                    sx={{
+                      width: 300,
+                      height: 200,
+                    }}
+                  ></Box>
                 </Box>
-              </Box>
-              <Box display="flex" justifyContent="center">
-                <a
-                  className="btn"
-                  href={`/certificatePage?token=${query.token}&participantId=${query.participantId}&name=${name}`}
-                  style={{
-                    fontSize: "12px",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  Obter NFT
-                </a>
-              </Box>
-            </Grid>
-          </>
-        )}
-      </Grid>
+                <Box display="flex" justifyContent="center">
+                  <a
+                    className="btn"
+                    href={`/certificatePage?token=${query.token}&participantId=${query.participantId}`}
+                    style={{
+                      fontSize: "12px",
+                      color: "white",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {minted ? "Ver NFT" : "Obter NFT"}
+                  </a>
+                </Box>
+              </Grid>
+            </>
+          )}
+        </Grid>
+      )}
     </div>
   );
 }
