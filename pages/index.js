@@ -15,6 +15,7 @@ export default function Index() {
   const [minted, setMinted] = useState(false);
   const [role, setRole] = useState("");
   const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
   useEffect(() => {
     setLoading(true);
     if (query.participantId !== undefined) {
@@ -32,17 +33,31 @@ export default function Index() {
                 setRole(result.data.role);
                 setMinted(result.data.minted);
                 setName(result.data.name);
+                if (result.data.minted) {
+                  axios
+                    .get(
+                      `https://amazonia-cripto-back-end.onrender.com/getParticipantNFTData/${query.participantId}`
+                    )
+                    .then((res) => {
+                      setUrl(res.data.pinataImageURL);
+                    })
+                    .catch((err) => {
+                      window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
+                        query.token
+                      }&participantId=${query.participantId}`;
+                    });
+                }
                 setLoading(false);
               })
               .catch((err, res) => {
-                window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - Error while getting Participant data"}&token=${
+                window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - Error while getting Participant data"}&token=${
                   query.token
                 }&participantId=${query.participantId}`;
               });
           }
         })
         .catch((err, res) => {
-          window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - Not Matched"}&token=${
+          window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - Not Matched"}&token=${
             query.token
           }&participantId=${query.participantId}`;
         });
@@ -64,6 +79,17 @@ export default function Index() {
                 sx={{ paddingY: { sm: 2, md: 4 } }}
               >
                 <Box display="flex" justifyContent="center" mt="90px">
+                  {minted ? (
+                    <Image src={url} alt="NFT URL" />
+                  ) : (
+                    <Box
+                      className="box"
+                      sx={{
+                        width: desktop ? 450 : 360,
+                        height: desktop ? 300 : 240,
+                      }}
+                    />
+                  )}
                   <Box
                     className="box"
                     sx={{
@@ -147,13 +173,17 @@ export default function Index() {
               </Grid>
               <Grid item xs={12} className="mockupLeft">
                 <Box display="flex" justifyContent="center" my="70px">
-                  <Box
-                    className="box"
-                    sx={{
-                      width: 300,
-                      height: 200,
-                    }}
-                  ></Box>
+                  {minted ? (
+                    <Image src={url} alt="NFT URL" />
+                  ) : (
+                    <Box
+                      className="box"
+                      sx={{
+                        width: 300,
+                        height: 200,
+                      }}
+                    ></Box>
+                  )}
                 </Box>
                 <Box display="flex" justifyContent="center">
                   <a

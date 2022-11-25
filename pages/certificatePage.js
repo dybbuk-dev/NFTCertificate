@@ -38,11 +38,12 @@ export default function certificatePage() {
               setTokenID(res.data.tokenId);
               setDescription(res.data.description);
               setName(res.data.name);
+              setUrl(res.data.pinataImageURL);
               setCollectionName(res.data.collectionName);
               setLoading(false);
             })
             .catch((err) => {
-              window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
+              window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
                 query.token
               }&participantId=${query.participantId}`;
             });
@@ -62,7 +63,7 @@ export default function certificatePage() {
               setLoading(false);
             })
             .catch((err) => {
-              window.location.href = `https://nftcertificate.herokuapp.com/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
+              window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
                 query.token
               }&participantId=${query.participantId}`;
             });
@@ -117,12 +118,7 @@ export default function certificatePage() {
                 </Box>
               </Box>
               <Box display="flex" justifyContent="center" mt="30px">
-                <Image
-                  src={url}
-                  width={desktop ? 450 : tablet ? 360 : 300}
-                  height={desktop ? 300 : tablet ? 240 : 200}
-                  alt="NFT URL"
-                />
+                <Image src={url} alt="NFT URL" />
               </Box>
               <Box gap={2} mt="50px" mb={tablet ? "10px" : "40px"}>
                 <Box display="flex" gap={2} sx={{ mb: "20px" }}>
