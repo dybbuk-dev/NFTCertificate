@@ -118,7 +118,12 @@ export default function certificatePage() {
                 </Box>
               </Box>
               <Box display="flex" justifyContent="center" mt="30px">
-                <Image src={url} alt="NFT URL" />
+                <Image
+                  src={url}
+                  width={desktop ? 450 : tablet ? 360 : 300}
+                  height={desktop ? 300 : tablet ? 240 : 200}
+                  alt="NFT URL"
+                />
               </Box>
               <Box gap={2} mt="50px" mb={tablet ? "10px" : "40px"}>
                 <Box display="flex" gap={2} sx={{ mb: "20px" }}>

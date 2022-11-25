@@ -80,7 +80,12 @@ export default function Index() {
               >
                 <Box display="flex" justifyContent="center" mt="90px">
                   {minted ? (
-                    <Image src={url} alt="NFT URL" />
+                    <Image
+                      src={url}
+                      alt="NFT URL"
+                      width={desktop ? 450 : 360}
+                      height={desktop ? 300 : 240}
+                    />
                   ) : (
                     <Box
                       className="box"
@@ -90,13 +95,6 @@ export default function Index() {
                       }}
                     />
                   )}
-                  <Box
-                    className="box"
-                    sx={{
-                      width: desktop ? 450 : 360,
-                      height: desktop ? 300 : 240,
-                    }}
-                  />
                 </Box>
                 <Box justifyContent="center" display="flex" pt="90px" mb="25px">
                   <a
@@ -174,7 +172,7 @@ export default function Index() {
               <Grid item xs={12} className="mockupLeft">
                 <Box display="flex" justifyContent="center" my="70px">
                   {minted ? (
-                    <Image src={url} alt="NFT URL" />
+                    <Image src={url} alt="NFT URL" width={300} height={200} />
                   ) : (
                     <Box
                       className="box"
