@@ -2,13 +2,13 @@ import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useRouter } from "next/router";
 import Header from "./components/Header";
 
-export default function Spinner() {
+export default function Error() {
   const desktop = useMediaQuery("(min-width:1024px)");
   const tablet = useMediaQuery("(min-width:768px)");
   const { query } = useRouter();
   return (
     <div>
-      <Header token={query.token} participantId={query.participantId} />
+      <Header />
       <Box className="banner">
         <Box>
           <Box
@@ -28,6 +28,23 @@ export default function Spinner() {
           >
             {query.error}
           </Typography>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            paddingTop={2}
+          >
+            <a
+              className="btn"
+              href={"/"}
+              style={{
+                fontSize: desktop ? "32px" : tablet ? "26px" : "20px",
+                color: "white",
+              }}
+            >
+              Try again
+            </a>
+          </Box>
         </Box>
       </Box>
     </div>

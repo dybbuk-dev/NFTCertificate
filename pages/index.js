@@ -2,6 +2,8 @@ import Header from "./components/Header";
 import { Box, Typography, useMediaQuery, Grid } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import * as actions from "../store/actions/participantAction";
 import profile from "../assets/profile.png";
 import { useEffect, useState } from "react";
 import Spinner from "./components/spinner";
@@ -10,64 +12,28 @@ import axios from "axios";
 export default function Index() {
   const desktop = useMediaQuery("(min-width:1024px)");
   const tablet = useMediaQuery("(min-width:768px)");
+  const { query } = useRouter();
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.lists.participantData);
   const [loading, setLoading] = useState(true);
-  let { query } = useRouter();
-  const [minted, setMinted] = useState(false);
-  const [role, setRole] = useState("");
-  const [name, setName] = useState("");
-  const [url, setUrl] = useState("");
+  let listLoading = useSelector((state) => state.lists.loading);
+  const token = useSelector((state) => state.lists.token);
+  const participantId = useSelector((state) => state.lists.participantId);
   useEffect(() => {
-    setLoading(true);
-    if (query.participantId !== undefined) {
-      axios
-        .get(
-          `https://amazonia-cripto-back-end.onrender.com/validateAccessToken/${query.token}/${query.participantId}`
-        )
-        .then((res) => {
-          if (res.status === 200) {
-            axios
-              .get(
-                `https://amazonia-cripto-back-end.onrender.com/getParticipantData/${query.participantId}`
-              )
-              .then((result) => {
-                setRole(result.data.role);
-                setMinted(result.data.minted);
-                setName(result.data.name);
-                if (result.data.minted) {
-                  axios
-                    .get(
-                      `https://amazonia-cripto-back-end.onrender.com/getParticipantNFTData/${query.participantId}`
-                    )
-                    .then((res) => {
-                      setUrl(res.data.pinataImageURL);
-                    })
-                    .catch((err) => {
-                      window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
-                        query.token
-                      }&participantId=${query.participantId}`;
-                    });
-                }
-                setLoading(false);
-              })
-              .catch((err, res) => {
-                window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - Error while getting Participant data"}&token=${
-                  query.token
-                }&participantId=${query.participantId}`;
-              });
-          }
-        })
-        .catch((err, res) => {
-          window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - Not Matched"}&token=${
-            query.token
-          }&participantId=${query.participantId}`;
-        });
-    }
-  }, [query.participantId]);
+    if (query?.token) {
+      if (token !== query.token || participantId !== query.participantId) {
+        dispatch(actions.setParticipantId(query.participantId));
+        dispatch(actions.setToken(query.token));
+        dispatch(actions.validateAccessToken(query.token, query.participantId));
+        dispatch(actions.getParticipantData(query.participantId));
+      } else setLoading(false);
+    } else setLoading(false);
+  }, [query?.token]);
   return (
     <div>
-      <Header token={query.token} participantId={query.participantId} />
-      {loading ? (
-        <Spinner />
+      <Header />
+      {loading && listLoading ? (
+        <Spinner label="verificando usuário" />
       ) : (
         <Grid container>
           {tablet ? (
@@ -79,7 +45,7 @@ export default function Index() {
                 sx={{ paddingY: { sm: 2, md: 4 } }}
               >
                 <Box display="flex" justifyContent="center" mt="90px">
-                  {minted ? (
+                  {data.minted ? (
                     <Image
                       src={url}
                       alt="NFT URL"
@@ -99,14 +65,14 @@ export default function Index() {
                 <Box justifyContent="center" display="flex" pt="90px" mb="25px">
                   <a
                     className="btn"
-                    href={`/certificatePage?token=${query.token}&participantId=${query.participantId}`}
+                    href={`/certificatePage?token=${token}&participantId=${participantId}`}
                     style={{
                       fontSize: "32px",
                       color: "white",
                       cursor: "pointer",
                     }}
                   >
-                    {minted ? "Ver NFT" : "Obter NFT"}
+                    {data.minted ? "Ver NFT" : "Obter NFT"}
                   </a>
                 </Box>
               </Grid>
@@ -123,17 +89,19 @@ export default function Index() {
                       <Image src={profile} className="avatar" alt="profile" />
                       <Box>
                         <Typography fontSize={desktop ? "32px" : "24px"}>
-                          <strong>{name} </strong>
+                          <strong>{data.name} </strong>
                         </Typography>
                       </Box>
                     </Box>
                     <Box gap={2} mt={desktop ? "4rem" : "3rem"}>
                       <Typography fontSize={desktop ? "32px" : "24px"}>
-                        Participação: <strong>{role}</strong>
+                        Participação: <strong>{data.role}</strong>
                       </Typography>
                       <Typography fontSize={desktop ? "32px" : "24px"}>
                         Token NFT:{" "}
-                        <strong>{minted ? "Resgatado" : "Disponível"}</strong>
+                        <strong>
+                          {data.minted ? "Resgatado" : "Disponível"}
+                        </strong>
                       </Typography>
                     </Box>
                   </Box>
@@ -153,17 +121,19 @@ export default function Index() {
                       ></Image>
                       <Box>
                         <Typography fontSize="18px">
-                          <strong>{name}</strong>
+                          <strong>{data.name}</strong>
                         </Typography>
                       </Box>
                     </Box>
                     <Box mt="2rem" mb="3rem">
                       <Typography fontSize="12px" mb="6px">
-                        Participação: <strong>{role}</strong>
+                        Participação: <strong>{data.role}</strong>
                       </Typography>
                       <Typography fontSize="12px">
                         Token NFT:{" "}
-                        <strong>{minted ? "Resgatado" : "Disponível"}</strong>
+                        <strong>
+                          {data.minted ? "Resgatado" : "Disponível"}
+                        </strong>
                       </Typography>
                     </Box>
                   </Box>
@@ -171,7 +141,7 @@ export default function Index() {
               </Grid>
               <Grid item xs={12} className="mockupLeft">
                 <Box display="flex" justifyContent="center" my="70px">
-                  {minted ? (
+                  {data.minted ? (
                     <Image src={url} alt="NFT URL" width={300} height={200} />
                   ) : (
                     <Box
@@ -186,14 +156,14 @@ export default function Index() {
                 <Box display="flex" justifyContent="center">
                   <a
                     className="btn"
-                    href={`/certificatePage?token=${query.token}&participantId=${query.participantId}`}
+                    href={`/certificatePage?token=${token}&participantId=${participantId}`}
                     style={{
                       fontSize: "12px",
                       color: "white",
                       cursor: "pointer",
                     }}
                   >
-                    {minted ? "Ver NFT" : "Obter NFT"}
+                    {data.minted ? "Ver NFT" : "Obter NFT"}
                   </a>
                 </Box>
               </Grid>

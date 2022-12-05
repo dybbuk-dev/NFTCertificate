@@ -2,7 +2,7 @@ import { Box, Typography, useMediaQuery } from "@mui/material";
 import Image from "next/image";
 import spin from "../../assets/spin.gif";
 
-export default function Spinner() {
+export default function Spinner(props) {
   const desktop = useMediaQuery("(min-width:1024px)");
   const tablet = useMediaQuery("(min-width:768px)");
   return (
@@ -36,7 +36,7 @@ export default function Spinner() {
             fontStyle="italic"
             sx={{ textAlign: "center" }}
           >
-            Aportando na retirada de créditos de carbono...
+            {props.label}
           </Typography>
         </Box>
       </Box>

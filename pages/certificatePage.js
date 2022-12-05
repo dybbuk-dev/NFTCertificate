@@ -1,85 +1,38 @@
 import Header from "./components/Header";
 import { Box, Typography, useMediaQuery, Grid, Link } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import actions from "../store/actions/participantAction";
 import Image from "next/image";
 import copy from "../assets/Copy.png";
 import arrow from "../assets/arrow.png";
 import check from "../assets/check.png";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import Spinner from "./components/spinner";
 import axios from "axios";
 
 export default function certificatePage() {
   const desktop = useMediaQuery("(min-width:1018px)");
   const tablet = useMediaQuery("(min-width:768px)");
-  let { query } = useRouter();
   const [loading, setLoading] = useState(true);
-  const [address, setAddress] = useState("");
-  const [tokenID, setTokenID] = useState("");
-  const [description, setDescription] = useState("");
-  const [collectionName, setCollectionName] = useState("");
-  const [name, setName] = useState("");
-  const [url, setUrl] = useState("");
-
+  setLoading(useSelector((state) => state.lists.loading));
+  const participantId = useSelector((state) => state.lists.participantId);
+  const minted = useSelector((state) => state.lists.minted);
+  const data = useSelecotr((state) => state.lists.nftData);
   useEffect(() => {
-    setLoading(true);
-    if (query.participantId !== undefined) {
-      axios
-        .get(
-          `https://amazonia-cripto-back-end.onrender.com/getNFTCertificate/${query.participantId}`
-        )
-        .then((res) => {
-          axios
-            .get(
-              `https://amazonia-cripto-back-end.onrender.com/getParticipantNFTData/${query.participantId}`
-            )
-            .then((res) => {
-              setAddress(res.data.collectionAddress);
-              setTokenID(res.data.tokenId);
-              setDescription(res.data.description);
-              setName(res.data.name);
-              setUrl(res.data.pinataImageURL);
-              setCollectionName(res.data.collectionName);
-              setLoading(false);
-            })
-            .catch((err) => {
-              window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
-                query.token
-              }&participantId=${query.participantId}`;
-            });
-        })
-        .catch((err) => {
-          axios
-            .get(
-              `https://amazonia-cripto-back-end.onrender.com/getParticipantNFTData/${query.participantId}`
-            )
-            .then((res) => {
-              setAddress(res.data.collectionAddress);
-              setTokenID(res.data.tokenId);
-              setDescription(res.data.description);
-              setName(res.data.name);
-              setCollectionName(res.data.collectionName);
-              setUrl(res.data.pinataImageURL);
-              setLoading(false);
-            })
-            .catch((err) => {
-              window.location.href = `http://localhost:3000/errorPage?error=${"Error 400 - This participant has none NFTs"}&token=${
-                query.token
-              }&participantId=${query.participantId}`;
-            });
-        });
+    if (!minted) {
+      dispatch(actions.getNFTCertificate(participantId));
     }
-  }, [query.participantId]);
-
+    dispatch(actions.getNFTData(participantId));
+  }, [dispatch, participantId]);
   const copyClipboard = () => {
-    navigator.clipboard.writeText(address);
+    navigator.clipboard.writeText(data.address);
     alert("Copied address");
   };
   return (
     <div>
-      <Header token={query.token} participantId={query.participantId} />
+      <Header />
       {loading ? (
-        <Spinner />
+        <Spinner label="Mintando NFT. Pode levar aproximadamente 1 minuto" />
       ) : (
         <Grid container>
           <Grid item xs={tablet ? 6 : 12} className="signLeft">
@@ -93,8 +46,8 @@ export default function certificatePage() {
                   fontSize={desktop ? "32px" : tablet ? "26px" : "20px"}
                   color="white"
                 >
-                  {address.substring(0, 5)} ......{" "}
-                  {address.substring(address.length - 5)}
+                  {data.address.substring(0, 5)} ......{" "}
+                  {data.address.substring(data.address.length - 5)}
                 </Typography>
                 <Box display="flex" gap={1}>
                   <Image
@@ -104,7 +57,7 @@ export default function certificatePage() {
                     style={{ cursor: "pointer" }}
                   />
                   <Link
-                    href={`https://polygonscan.com/address/${address}`}
+                    href={`https://polygonscan.com/address/${data.address}`}
                     target="_blank"
                   >
                     <Image
@@ -131,7 +84,7 @@ export default function certificatePage() {
                     fontSize={desktop ? "32px" : tablet ? "26px" : "20px"}
                     color="white"
                   >
-                    {collectionName}
+                    {data.collectionName}
                   </Typography>
                   <Image src={check} width="auto" height="auto" alt="check" />
                 </Box>
@@ -140,17 +93,18 @@ export default function certificatePage() {
                   fontWeight="700"
                   color="white"
                 >
-                  {name}
+                  {data.name}
                 </Typography>
               </Box>
               <Box
                 display={tablet ? "flex" : "none"}
-                justifyContent="center"
+                justifyContent="space-between"
                 alignItems="center"
+                marginX={desktop ? 3 : 1}
               >
                 <a
                   className="btn"
-                  href={`/?token=${query.token}&participantId=${query.participantId}`}
+                  href={"/"}
                   style={{
                     fontSize: desktop ? "32px" : tablet ? "26px" : "20px",
                     color: "white",
@@ -158,6 +112,19 @@ export default function certificatePage() {
                 >
                   Voltar
                 </a>
+                <button
+                  className="btn"
+                  style={{
+                    border: "none",
+                    fontSize: desktop ? "32px" : tablet ? "26px" : "20px",
+                    color: "white",
+                    paddingTop: tablet ? "18px" : "12px",
+                    paddingBottom: tablet ? "18px" : "12px",
+                  }}
+                  onClick={() => dispatch(actions.downloadImage(participantId))}
+                >
+                  Babar
+                </button>
               </Box>
             </Box>
           </Grid>
@@ -186,8 +153,8 @@ export default function certificatePage() {
                     color="#43793F"
                     fontSize={desktop ? "18px" : tablet ? "15px" : "12px"}
                   >
-                    {address.substring(0, 5)} ......{" "}
-                    {address.substring(address.length - 5)}
+                    {data.address.substring(0, 5)} ......{" "}
+                    {data.address.substring(data.address.length - 5)}
                   </Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between" mt="20px">
@@ -201,7 +168,7 @@ export default function certificatePage() {
                     color="#43793F"
                     fontSize={desktop ? "18px" : tablet ? "15px" : "12px"}
                   >
-                    {tokenID}
+                    {data.tokenID}
                   </Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between" mt="20px">
@@ -242,18 +209,18 @@ export default function certificatePage() {
               <Box sx={{ padding: desktop ? "30px" : "10px" }}>
                 <Box display="flex" justifyContent="space-between">
                   <Typography fontSize={desktop ? "18px" : "15px"}>
-                    {description}
+                    {data.description}
                   </Typography>
                 </Box>
               </Box>
               <Box
                 display={tablet ? "none" : "flex"}
-                justifyContent="center"
+                justifyContent="space-around"
                 alignItems="center"
               >
                 <a
                   className="btn"
-                  href={`/?token=${query.token}&participantId=${query.participantId}`}
+                  href={"/"}
                   style={{
                     fontSize: desktop ? "32px" : tablet ? "26px" : "20px",
                     color: "white",
@@ -261,6 +228,19 @@ export default function certificatePage() {
                 >
                   Voltar
                 </a>
+                <button
+                  className="btn"
+                  style={{
+                    border: "none",
+                    fontSize: desktop ? "32px" : tablet ? "26px" : "20px",
+                    color: "white",
+                    paddingTop: tablet ? "18px" : "12px",
+                    paddingBottom: tablet ? "18px" : "12px",
+                  }}
+                  onClick={() => dispatch(actions.downloadImage(participantId))}
+                >
+                  Babar
+                </button>
               </Box>
             </Box>
           </Grid>
